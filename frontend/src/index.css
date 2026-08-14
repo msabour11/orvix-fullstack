@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-orvix-dark text-orvix-white font-tajawal antialiased;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl;
+  }
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-orvix-green to-orvix-accent;
+  }
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-orvix-primary to-orvix-blue text-white rounded-xl font-semibold 
+           hover:shadow-lg hover:shadow-orvix-primary/30 transition-all duration-300 hover:-translate-y-0.5;
+  }
+  .btn-secondary {
+    @apply px-6 py-3 border border-orvix-gray/30 text-orvix-white rounded-xl font-semibold 
+           hover:bg-white/10 transition-all duration-300;
+  }
+  .section-padding {
+    @apply py-20 px-4 sm:px-6 lg:px-8;
+  }
+  .container-custom {
+    @apply max-w-7xl mx-auto;
+  }
+}
