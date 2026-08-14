@@ -1,16 +1,25 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mongodb:
     image: mongo:6.0
     container_name: orvix_mongodb
     restart: unless-stopped
+    # Only expose port if you need external DB access (e.g., Compass).
+    # Otherwise, remove this 'ports' block to lock it down to the internal Docker network.
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
     environment:
-      MONGO_INITDB_DATABASE: orvix_solutions
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -21,17 +30,19 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV}
       - PORT=5000
-      - MONGODB_URI=mongodb://mongodb:27017/orvix_solutions
-      - JWT_SECRET=change_this_to_a_secure_random_string_in_production
-      - ADMIN_EMAIL=admin@orvix.com
-      - ADMIN_PASSWORD=change_this_password_in_production
-      - FRONTEND_URL=http://localhost
+      # Updated URI to include authentication credentials
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_DB_NAME}?authSource=admin
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
-      - mongodb
-    volumes:
-      - ./backend/src:/app/src
+      mongodb:
+        condition: service_healthy
+    # Removed the volume bind mount assuming this is for production.
+    # If this is for local dev, put it back and change NODE_ENV to development.
 
   frontend:
     build:
